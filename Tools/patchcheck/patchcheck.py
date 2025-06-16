@@ -66,16 +66,14 @@ def get_git_upstream_remote():
         cwd=SRCDIR,
         encoding="UTF-8"
     )
-    url_filter = [
-        url for url in output.split("\n")
-        if url.endswith("/python/cpython.git (fetch)") or
-        url.endswith(":python/cpython.git (fetch)")
+    filtered_remotes = [
+        remote.split("\t")[0] for remote in output.split("\n")
+        if remote.endswith("/python/cpython.git (fetch)") or
+        remote.endswith(":python/cpython.git (fetch)")
     ]
-    valid_remotes = ["upstream", "origin", "python"]
-    for remote in valid_remotes:
-        for remote_name in url_filter:
-            if remote_name.startswith(f"{remote}\t"):
-                return remote
+    for remote_name in ["upstream", "origin", "python"]:
+        if remote_name in filtered_remotes:
+            return remote_name
     raise ValueError(
         f"Patchcheck was unable to find a valid upstream repository. "
         f"Valid names are 'upstream', 'origin', or 'python'. "
