@@ -55,21 +55,34 @@ def get_git_branch():
 def get_git_upstream_remote():
     """Get the remote name to use for upstream branches
 
-    Check for "origin" or "upstream", and raise an error if
-    neither is found.
+    Check for "origin", "upstream", or "python" and raise
+    an error if other are found.
     """
-    cmd = "git remote show".split()
+    cmd = "git remote -v".split()
     output = subprocess.check_output(
         cmd, stderr=subprocess.DEVNULL, cwd=SRCDIR, encoding="UTF-8"
     )
-    if "origin" in output:
-        return "origin"
-    elif "upstream" in output:
-        return "upstream"
-    else:
-        raise ValueError(
-            f"Git remote must be named 'origin' or 'upstream'. "
-            f"Remote names found: {', '.join(output.splitlines())}"
+    outputlist = output.split("\n")
+    url_filter = [
+        url for url in
+        [fetch_url for fetch_url in outputlist if fetch_url.endswith(" (fetch)")]
+        if "/python/cpython.git" in url or ":python/cpython.git" in url
+    ]
+    valid_remotes = ["upstream", "origin", "python"]
+    if len(url_filter) == 1 and url_filter[0].split("\t")[0] in valid_remotes:
+        return url_filter[0].split("\t")[0]
+    elif len(url_filter) > 1:
+        for remote in valid_remotes:
+            for remote_name in url_filter:
+                remote_names = remote_name.split("\t")[0]
+                if remote in remote_names:
+                    return remote
+    raise ValueError(
+        f"Patchcheck was unable to find a valid upstream repository. "
+        f"Did you create an upstream repository? See Dev Guide for details: "
+        f"https://devguide.python.org/getting-started/git-boot-camp/#cloning-a-forked-cpython-repository "
+        f"The upstream repository must be named 'upstream', 'origin', or 'python'. "
+        f"Remote names found: \n{output}"
         )
 
 
