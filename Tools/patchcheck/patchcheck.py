@@ -56,7 +56,7 @@ def get_git_upstream_remote():
     """Get the remote name to use for upstream branches
 
     Check for "origin", "upstream", or "python" and raise
-    an error if other are found.
+    an error if none are found.
     """
     cmd = "git remote -v".split()
     output = subprocess.check_output(
@@ -73,9 +73,9 @@ def get_git_upstream_remote():
         return url_filter[0].split("\t")[0]
     elif len(url_filter) > 1:
         for remote in valid_remotes:
-            for remote_name in url_filter:
-                remote_names = remote_name.split("\t")[0]
-                if remote in remote_names:
+            for remote_names in url_filter:
+                remote_name = remote_names.split("\t")[0]
+                if remote in remote_name:
                     return remote
     raise ValueError(
         f"Patchcheck was unable to find a valid upstream repository. "
