@@ -55,17 +55,22 @@ def get_git_branch():
 def get_git_upstream_remote():
     """Get the remote name to use for upstream branches
 
-    Uses "upstream" if it exists, "origin" otherwise
+    Check for "origin" or "upstream", and raise an error if
+    neither is found.
     """
-    cmd = "git remote get-url upstream".split()
-    try:
-        subprocess.check_output(cmd,
-                                stderr=subprocess.DEVNULL,
-                                cwd=SRCDIR,
-                                encoding='UTF-8')
-    except subprocess.CalledProcessError:
+    cmd = "git remote show".split()
+    output = subprocess.check_output(
+        cmd, stderr=subprocess.DEVNULL, cwd=SRCDIR, encoding="UTF-8"
+    )
+    if "origin" in output:
         return "origin"
-    return "upstream"
+    elif "upstream" in output:
+        return "upstream"
+    else:
+        raise ValueError(
+            f"Git remote must be named 'origin' or 'upstream'. "
+            f"Remote names found: {', '.join(output.splitlines())}"
+        )
 
 
 def get_git_remote_default_branch(remote_name):
