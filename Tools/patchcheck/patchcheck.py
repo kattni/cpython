@@ -53,35 +53,35 @@ def get_git_branch():
 
 
 def get_git_upstream_remote():
-    """Get the remote name to use for upstream branches
+    """
+    Get the remote name to use for upstream branches
 
-    Check for "origin", "upstream", or "python" and raise
-    an error if none are found.
+    Check for and use "upstream", "origin", or "python",
+    in that order, and raise an error if none are found.
     """
     cmd = "git remote -v".split()
     output = subprocess.check_output(
-        cmd, stderr=subprocess.DEVNULL, cwd=SRCDIR, encoding="UTF-8"
+        cmd,
+        stderr=subprocess.DEVNULL,
+        cwd=SRCDIR,
+        encoding="UTF-8"
     )
-    outputlist = output.split("\n")
     url_filter = [
-        url for url in
-        [fetch_url for fetch_url in outputlist if fetch_url.endswith(" (fetch)")]
-        if "/python/cpython.git" in url or ":python/cpython.git" in url
+        url for url in output.split("\n")
+        if url.endswith("/python/cpython.git (fetch)") or
+        url.endswith(":python/cpython.git (fetch)")
     ]
     valid_remotes = ["upstream", "origin", "python"]
-    if len(url_filter) == 1 and url_filter[0].split("\t")[0] in valid_remotes:
-        return url_filter[0].split("\t")[0]
-    elif len(url_filter) > 1:
-        for remote in valid_remotes:
-            for remote_names in url_filter:
-                remote_name = remote_names.split("\t")[0]
-                if remote in remote_name:
-                    return remote
+    for remote in valid_remotes:
+        for remote_name in url_filter:
+            if remote_name.startswith(f"{remote}\t"):
+                return remote
     raise ValueError(
         f"Patchcheck was unable to find a valid upstream repository. "
+        f"Valid names are 'upstream', 'origin', or 'python'. "
         f"Did you create an upstream repository? See Dev Guide for details: "
-        f"https://devguide.python.org/getting-started/git-boot-camp/#cloning-a-forked-cpython-repository "
-        f"The upstream repository must be named 'upstream', 'origin', or 'python'. "
+        f"https://devguide.python.org/getting-started/"
+        f"git-boot-camp/#cloning-a-forked-cpython-repository "
         f"Remote names found: \n{output}"
         )
 
