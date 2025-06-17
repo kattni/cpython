@@ -66,11 +66,11 @@ def get_git_upstream_remote():
         cwd=SRCDIR,
         encoding="UTF-8"
     )
-    filtered_remotes = [
+    filtered_remotes = {
         remote.split("\t")[0] for remote in output.split("\n")
         if remote.endswith("/python/cpython.git (fetch)") or
         remote.endswith(":python/cpython.git (fetch)")
-    ]
+    }
     for remote_name in ["upstream", "origin", "python"]:
         if remote_name in filtered_remotes:
             return remote_name
