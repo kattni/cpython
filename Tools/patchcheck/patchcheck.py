@@ -66,6 +66,7 @@ def get_git_upstream_remote():
         cwd=SRCDIR,
         encoding="UTF-8"
     )
+    # Filter to desired remotes, accounting for potential uppercasing
     filtered_remotes = {
         remote.split("\t")[0].lower() for remote in output.split('\n')
         if "python/cpython" in remote.lower() and remote.endswith("(fetch)")
