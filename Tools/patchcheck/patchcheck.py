@@ -66,10 +66,9 @@ def get_git_upstream_remote():
         cwd=SRCDIR,
         encoding="UTF-8"
     )
-    lowercased_output = {remote.lower() for remote in output.split("\n")}
     filtered_remotes = {
-        remote.split("\t")[0] for remote in lowercased_output
-        if "python/cpython" in remote and remote.endswith("(fetch)")
+        remote.split("\t")[0].lower() for remote in output.split('\n')
+        if "python/cpython" in remote.lower() and remote.endswith("(fetch)")
     }
     for remote_name in ["upstream", "origin", "python"]:
         if remote_name in filtered_remotes:
