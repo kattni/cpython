@@ -73,15 +73,16 @@ def get_git_upstream_remote():
     for remote_name in ["upstream", "origin", "python"]:
         if remote_name in filtered_remotes:
             return remote_name
+    remote_names_found = "\n".join(
+        {remote.split('\t')[0] for remote in output.split('\n') if remote}
+    )
     raise ValueError(
         f"Patchcheck was unable to find a valid upstream repository. "
         f"Valid names are 'upstream', 'origin', or 'python'. "
         f"For help creating an upstream repository, see Dev Guide: "
         f"https://devguide.python.org/getting-started/"
         f"git-boot-camp/#cloning-a-forked-cpython-repository "
-        f"\nRemote names found: \n{"\n".join(
-            {remote.split('\t')[0] for remote in output.split('\n') if remote}
-        )}"
+        f"\nRemote names found: \n{remote_names_found}"
         )
 
 
